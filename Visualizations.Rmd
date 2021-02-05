@@ -1,0 +1,106 @@
+---
+title: "Graphics Practice"
+author: Amy Tang
+output: html_document
+---
+
+
+```{r message = FALSE, warning = FALSE}
+library(readr)
+library(tidyverse)
+library(gridExtra)
+library(ggthemes)
+```
+
+## 1 Scatterplot of NBA Player Salary on Height
+
+```{r}
+
+setwd("~/Desktop/STATS 20")
+load("Lesson9SU.RData")
+
+test <- inner_join(nbaall, salary, by = "Player")
+test <- test %>% 
+  mutate(salary = as.numeric(`Salary2019-20`),
+         height = (as.numeric(substr(test$Ht, start = 1, stop = 1)) * 12) +
+           (as.numeric(substr(test$Ht, start = 3, stop = 4))))
+
+ggplot(test, aes(x = height, y = log(salary), color = Pos)) +
+    labs(y= "Salary (in dollars)", x = "Height (in inches)", title = "NBA Salary on Player Height") +
+    geom_point() +
+    geom_smooth(method='lm', se=FALSE)
+
+
+```
+
+
+## 2 Boxplots of Height Distribution of Teams
+
+```{r fig.width = 10}
+
+is_outlier <- function(x) {
+  return(x < quantile(x, 0.25) - 2 * IQR(x) | x > quantile(x, 0.75) + 2 * IQR(x))
+}
+
+
+test <- test %>% 
+  mutate(final = ifelse(Team %in% c("GSW", "TOR"),"Yes","No"),
+         outlier = ifelse(is_outlier(height) &
+                            !(Team %in% c("DAL", "NOP")), Player, as.numeric(NA)),
+         outlier2 = ifelse(is_outlier(`Salary2019-20`) & 
+                             Team %in% c("DAL", "NOP"), 
+                             Player, as.numeric(NA)))
+ggplot(test, aes(x = reorder(Team, height, FUN = median), 
+                 y = height, 
+                 fill = final)) + 
+    stat_boxplot(geom = "errorbar", width = 0.75, coef = 1.5) + 
+    geom_boxplot() +
+    scale_fill_manual(values=c("grey", "cyan"), 
+                      name = "NBA Final 2019") +
+    ylim(65,95) +
+    labs(title="Height Distribution by Team, 2019-2020",
+        x ="Team", y = "Height in Inches") +
+    theme_few() +
+    theme(plot.title = element_text(hjust = 0.5),
+          legend.position="bottom")
+```
+
+## 3 Histograms of Yelp Ratings by Category
+
+```{r}
+
+library(readr)
+yelp3 <- read_csv("http://www.stat.ucla.edu/~vlew/datasets/yelp3.csv")
+VEGAN <- yelp3[which(yelp3$categories.0 == "Vegan"),]
+BUFFETS <- yelp3[which(yelp3$categories.0 == "Buffets"),]
+SPORTSBAR <- yelp3[which(yelp3$categories.0 == "Sports Bars"),]
+veg <- ggplot(data=VEGAN, aes(stars)) +  geom_histogram(binwidth=0.5, color = "black", fill = "orange") + labs(title="Vegan Ratings",x="Yelp Ratings", y = "Density")
+buf <- ggplot(data=BUFFETS, aes(stars)) + geom_histogram(binwidth=0.5,color = "black", fill = "blue") + labs(title="Buffet Ratings",x="Yelp Ratings", y = "Density")
+spo <- ggplot(data=SPORTSBAR, aes(stars)) + geom_histogram(binwidth=0.5,  color = "black", fill = "maroon") + labs(title="Sports Bar Ratings",x="Yelp Ratings", y = "Density")
+
+grid.arrange(veg, buf, spo, ncol=1, nrow =3)
+
+
+```
+
+## 4 Multiple Line Graph, Stacked Data of Netflix (NFLX) Stock Prices
+
+```{r}
+
+NFLX <- read_csv("NFLX.csv")
+
+NFLX2020 <- NFLX %>% 
+    slice(222:253) %>%  
+    select(Date, Open, High, Low, Close) %>% 
+    pivot_longer(-Date, names_to = "status", values_to = "price")
+
+ggplot(data=NFLX2020, aes(x = Date, y = price, color = status)) + 
+  geom_line() +
+  labs(title="Netflix (NFLX) Price in the past 30 days", 
+       caption="Source: Yahoo.com finance", 
+       y="Price in Dollars") +
+  scale_x_date(date_breaks = "days" ,date_labels = "%m/%d") +
+  theme_fivethirtyeight() + 
+  theme(axis.text=element_text(size=8, angle = 90))
+
+```
