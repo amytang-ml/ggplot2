@@ -12,11 +12,10 @@ library(gridExtra)
 library(ggthemes)
 ```
 
-## 1 Scatterplot of NBA Player Salary on Height
+## Scatterplot of NBA Player Salary on Height
 
 ```{r}
 
-setwd("~/Desktop/STATS 20")
 load("Lesson9SU.RData")
 
 test <- inner_join(nbaall, salary, by = "Player")
@@ -34,7 +33,7 @@ ggplot(test, aes(x = height, y = log(salary), color = Pos)) +
 ```
 
 
-## 2 Boxplots of Height Distribution of Teams
+## Boxplots of Height Distribution of Teams
 
 ```{r fig.width = 10}
 
@@ -65,25 +64,8 @@ ggplot(test, aes(x = reorder(Team, height, FUN = median),
           legend.position="bottom")
 ```
 
-## 3 Histograms of Yelp Ratings by Category
 
-```{r}
-
-library(readr)
-yelp3 <- read_csv("http://www.stat.ucla.edu/~vlew/datasets/yelp3.csv")
-VEGAN <- yelp3[which(yelp3$categories.0 == "Vegan"),]
-BUFFETS <- yelp3[which(yelp3$categories.0 == "Buffets"),]
-SPORTSBAR <- yelp3[which(yelp3$categories.0 == "Sports Bars"),]
-veg <- ggplot(data=VEGAN, aes(stars)) +  geom_histogram(binwidth=0.5, color = "black", fill = "orange") + labs(title="Vegan Ratings",x="Yelp Ratings", y = "Density")
-buf <- ggplot(data=BUFFETS, aes(stars)) + geom_histogram(binwidth=0.5,color = "black", fill = "blue") + labs(title="Buffet Ratings",x="Yelp Ratings", y = "Density")
-spo <- ggplot(data=SPORTSBAR, aes(stars)) + geom_histogram(binwidth=0.5,  color = "black", fill = "maroon") + labs(title="Sports Bar Ratings",x="Yelp Ratings", y = "Density")
-
-grid.arrange(veg, buf, spo, ncol=1, nrow =3)
-
-
-```
-
-## 4 Multiple Line Graph, Stacked Data of Netflix (NFLX) Stock Prices
+## Multiple Line Graph, Stacked Data of Netflix (NFLX) Stock Prices
 
 ```{r}
 
