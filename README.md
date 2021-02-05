@@ -1,1 +1,1 @@
-# ggplot2
+# Practicing visualizations using ggplot2
